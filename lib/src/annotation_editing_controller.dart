@@ -3,24 +3,25 @@ part of flutter_mentions;
 /// A custom implementation of [TextEditingController] to support @ mention or other
 /// trigger based mentions.
 class AnnotationEditingController extends TextEditingController {
-  Map<String, Annotation> _mapping;
+  Map<String, Annotation>? _mapping;
   String? _pattern;
 
-  // Generate the Regex pattern for matching all the suggestions in one.
-  AnnotationEditingController(this._mapping)
-      : _pattern = _mapping.keys.isNotEmpty
-            ? "(${_mapping.keys.map((key) => RegExp.escape(key)).join('|')})"
-            : null;
+  void setMapping(Map<String, Annotation> mapping) {
+    _mapping = mapping;
+    _pattern = _mapping!.keys.isNotEmpty
+        ? "(${_mapping!.keys.map((key) => RegExp.escape(key)).join('|')})"
+        : null;
+  }
 
   /// Can be used to get the markup from the controller directly.
   String get markupText {
-    final someVal = _mapping.isEmpty
+    final someVal = _mapping!.isEmpty
         ? text
         : text.splitMapJoin(
             RegExp('$_pattern'),
             onMatch: (Match match) {
-              final mention = _mapping[match[0]!] ??
-                  _mapping[_mapping.keys.firstWhere((element) {
+              final mention = _mapping![match[0]!] ??
+                  _mapping![_mapping!.keys.firstWhere((element) {
                     final reg = RegExp(element);
 
                     return reg.hasMatch(match[0]!);
@@ -45,7 +46,7 @@ class AnnotationEditingController extends TextEditingController {
   }
 
   Map<String, Annotation> get mapping {
-    return _mapping;
+    return _mapping!;
   }
 
   set mapping(Map<String, Annotation> _mapping) {
@@ -64,9 +65,9 @@ class AnnotationEditingController extends TextEditingController {
       text.splitMapJoin(
         RegExp('$_pattern'),
         onMatch: (Match match) {
-          if (_mapping.isNotEmpty) {
-            final mention = _mapping[match[0]!] ??
-                _mapping[_mapping.keys.firstWhere((element) {
+          if (_mapping!.isNotEmpty) {
+            final mention = _mapping![match[0]!] ??
+                _mapping![_mapping!.keys.firstWhere((element) {
                   final reg = RegExp(element);
 
                   return reg.hasMatch(match[0]!);

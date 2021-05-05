@@ -5,6 +5,7 @@ class FlutterMentions extends StatefulWidget {
     required this.mentions,
     Key? key,
     this.defaultText,
+    required this.controller,
     this.suggestionPosition = SuggestionPosition.Bottom,
     this.suggestionListHeight = 300.0,
     this.onMarkupChanged,
@@ -51,7 +52,7 @@ class FlutterMentions extends StatefulWidget {
     this.hideSuggestionList = false,
     this.onSuggestionVisibleChanged,
   }) : super(key: key);
-
+  final AnnotationEditingController controller;
   final bool hideSuggestionList;
 
   /// default text for the Mention Input.
@@ -246,7 +247,6 @@ class FlutterMentions extends StatefulWidget {
 }
 
 class FlutterMentionsState extends State<FlutterMentions> {
-  AnnotationEditingController? controller;
   ValueNotifier<bool> showSuggestions = ValueNotifier(false);
   LengthMap? _selectedMention;
   String _pattern = '';
@@ -303,7 +303,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         .firstWhere((element) => selectedMention.str.contains(element.trigger));
 
     // find the text by range and replace with the new value.
-    controller!.text = controller!.value.text.replaceRange(
+    widget.controller.text = widget.controller.value.text.replaceRange(
       selectedMention.start,
       selectedMention.end,
       "${_list.trigger}${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
@@ -315,12 +315,12 @@ class FlutterMentionsState extends State<FlutterMentions> {
     var nextCursorPosition =
         selectedMention.start + 1 + value['display']?.length as int? ?? 0;
     if (widget.appendSpaceOnAdd) nextCursorPosition++;
-    controller!.selection =
+    widget.controller.selection =
         TextSelection.fromPosition(TextPosition(offset: nextCursorPosition));
   }
 
   void suggestionListerner() {
-    final cursorPos = controller!.selection.baseOffset;
+    final cursorPos = widget.controller.selection.baseOffset;
 
     if (cursorPos >= 0) {
       var _pos = 0;
@@ -328,7 +328,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
       final lengthMap = <LengthMap>[];
 
       // split on each word and generate a list with start & end position of each word.
-      controller!.value.text.split(RegExp(r'(\s)')).forEach((element) {
+      widget.controller.value.text.split(RegExp(r'(\s)')).forEach((element) {
         lengthMap.add(
             LengthMap(str: element, start: _pos, end: _pos + element.length));
 
@@ -356,11 +356,11 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   void inputListeners() {
     if (widget.onChanged != null) {
-      widget.onChanged!(controller!.text);
+      widget.onChanged!(widget.controller.text);
     }
 
     if (widget.onMarkupChanged != null) {
-      widget.onMarkupChanged!(controller!.markupText);
+      widget.onMarkupChanged!(widget.controller.markupText);
     }
 
     if (widget.onSearchChanged != null && _selectedMention?.str != null) {
@@ -374,24 +374,24 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void initState() {
     final data = mapToAnotation();
 
-    controller = AnnotationEditingController(data);
+    widget.controller.setMapping(data);
 
     if (widget.defaultText != null) {
-      controller!.text = widget.defaultText!;
+      widget.controller.text = widget.defaultText!;
     }
 
     // setup a listener to figure out which suggestions to show based on the trigger
-    controller!.addListener(suggestionListerner);
+    widget.controller.addListener(suggestionListerner);
 
-    controller!.addListener(inputListeners);
+    widget.controller.addListener(inputListeners);
 
     super.initState();
   }
 
   @override
   void dispose() {
-    controller!.removeListener(suggestionListerner);
-    controller!.removeListener(inputListeners);
+    widget.controller.removeListener(suggestionListerner);
+    widget.controller.removeListener(inputListeners);
 
     super.dispose();
   }
@@ -400,7 +400,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void didUpdateWidget(widget) {
     super.didUpdateWidget(widget);
 
-    controller!.mapping = mapToAnotation();
+    widget.controller.mapping = mapToAnotation();
   }
 
   @override
@@ -475,7 +475,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                   scrollController: widget.scrollController,
                   scrollPadding: widget.scrollPadding,
                   scrollPhysics: widget.scrollPhysics,
-                  controller: controller,
+                  controller: widget.controller,
                 ),
               ),
               ...widget.trailing,
