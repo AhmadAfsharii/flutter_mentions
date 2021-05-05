@@ -14,7 +14,7 @@ class FlutterMentions extends StatefulWidget {
     this.leading = const [],
     this.trailing = const [],
     this.suggestionListDecoration,
-    this.focusNode,
+    required this.focusNode,
     this.decoration = const InputDecoration(),
     this.keyboardType,
     this.textInputAction,
@@ -97,7 +97,7 @@ class FlutterMentions extends StatefulWidget {
   final BoxDecoration? suggestionListDecoration;
 
   /// Focus node for controlling the focus of the Input.
-  final FocusNode? focusNode;
+  final FocusNode focusNode;
 
   /// Should selecting a suggestion add a space at the end or not.
   final bool appendSpaceOnAdd;
@@ -197,7 +197,7 @@ class FlutterMentions extends StatefulWidget {
 
   /// The color to use when painting the cursor.
   ///
-  /// Defaults to [ThemeData.cursorColor] or [CupertinoTheme.primaryColor]
+  /// Defaults to [TextSelectionThemeData.cursorColor] or [CupertinoTheme.primaryColor]
   /// depending on [ThemeData.platform] .
   final Color? cursorColor;
 
@@ -384,7 +384,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
     widget.controller.addListener(suggestionListerner);
 
     widget.controller.addListener(inputListeners);
-
+    widget.focusNode.addListener(() {
+      if (widget.focusNode.hasFocus == false) showSuggestions.value = false;
+    });
     super.initState();
   }
 

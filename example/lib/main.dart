@@ -32,6 +32,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   GlobalKey<FlutterMentionsState> key = GlobalKey<FlutterMentionsState>();
   AnnotationEditingController controller = AnnotationEditingController();
+  FocusNode focusNode = FocusNode();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,8 +40,14 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title!),
       ),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
+          ElevatedButton(
+            onPressed: () {
+              FocusScope.of(context).unfocus();
+            },
+            child: Text('clear focus'),
+          ),
           Container(
             child: FlutterMentions(
               controller: controller,
@@ -48,6 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
               suggestionPosition: SuggestionPosition.Top,
               maxLines: 5,
               minLines: 1,
+              focusNode: focusNode,
               decoration: InputDecoration(hintText: 'hello'),
               mentions: [
                 Mention(
